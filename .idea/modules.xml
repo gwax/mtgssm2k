@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/mtgssm2k.iml" filepath="$PROJECT_DIR$/mtgssm2k.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/mtgssm2k_main.iml" filepath="$PROJECT_DIR$/.idea/modules/mtgssm2k_main.iml" group="mtgssm2k" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/mtgssm2k_test.iml" filepath="$PROJECT_DIR$/.idea/modules/mtgssm2k_test.iml" group="mtgssm2k" />
+    </modules>
+  </component>
+</project>
