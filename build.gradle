@@ -26,23 +26,23 @@ configurations {
 }
 
 dependencies {
-    ktlint "com.github.shyiko:ktlint:0.14.0"
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compile "com.github.kittinunf.fuel:fuel:$fuel_version"
-    compile 'com.rometools:rome:1.9.0'
-    compile 'com.rometools:rome-fetcher:1.9.0'
-    compile 'org.apache.httpcomponents:httpclient:4.5.2'
-    compile 'io.github.microutils:kotlin-logging:1.4.9'
     compile "com.github.debop:koda-time:1.2.1"
-    compile 'com.google.code.gson:gson:2.8.2'
+    compile "com.github.kittinunf.fuel:fuel:$fuel_version"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
+    compile 'com.google.code.gson:gson:2.8.2'
+    compile 'com.rometools:rome:1.9.0'
+    compile 'io.github.microutils:kotlin-logging:1.4.9'
+    compile 'org.apache.httpcomponents:httpcore:4.4.8'
     compile 'org.mapdb:mapdb:3.0.5'
     compile 'org.slf4j:slf4j-api:1.7.25'
     compile 'org.slf4j:slf4j-simple:1.7.25'
-    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
-    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    ktlint "com.github.shyiko:ktlint:0.14.0"
+    testCompile "io.mockk:mockk:1.6.2"
     testCompile "junit:junit:$junit4_version"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
 }
 
 task ktlint(type: JavaExec, group: "verification") {

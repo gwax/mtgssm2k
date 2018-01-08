@@ -1,12 +1,15 @@
 package com.gwax.scryfall
 
+import com.github.kittinunf.fuel.core.FuelManager
+import com.github.kittinunf.fuel.core.Method
+import com.github.kittinunf.fuel.core.Response
+import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.rometools.rome.io.SyndFeedInput
 import com.rometools.rome.io.XmlReader
 import mu.KLogging
 import org.apache.http.HttpStatus
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.impl.client.HttpClients
 import org.joda.time.DateTime
+import java.io.InputStream
 import java.io.Serializable
 import java.util.*
 
@@ -15,34 +18,28 @@ data class ScryfallChangelog(val eTag: String, val latestEntry: DateTime) : Seri
 
     companion object : KLogging() {
         const val CHANGELOG_FEED_URL = "https://scryfall.com/changelog/feed"
+        private val fuel: FuelManager by lazy { FuelManager() }
     }
 
     fun fetchLatest(): ScryfallChangelog {
-        HttpClients.createMinimal().use { client ->
-            val request = HttpGet(CHANGELOG_FEED_URL)
-            if (eTag.isNotEmpty()) request.addHeader("If-None-Match", eTag)
-            client.execute(request).use { response ->
-                logger.debug { response.statusLine }
-                return when (response.statusLine.statusCode) {
-                    HttpStatus.SC_NOT_MODIFIED -> this
-                    HttpStatus.SC_OK -> {
-                        val eTagHeaders = response.getHeaders("ETag")
-                        val newETag = if (eTagHeaders.isEmpty()) {
-                            ""
-                        } else {
-                            eTagHeaders[0].value
-                        }
-                        response.entity.content.use { stream ->
-                            val feed = SyndFeedInput().build(XmlReader(stream))
-                            val latestDate = feed.entries.map { it.updatedDate }.max() ?: Date(0L)
-                            return ScryfallChangelog(newETag, DateTime(latestDate))
-                        }
-                    }
-                    else -> {
-                        logger.error { "Server responded with: ${response.statusLine}" }
-                        return ScryfallChangelog()
-                    }
-                }
+        val request = fuel.request(Method.GET, CHANGELOG_FEED_URL)
+        if (eTag.isNotEmpty())
+            request.headers["If-None-Match"] = eTag
+        val (_, response, result) = request.responseObject(object : ResponseDeserializable<InputStream> {
+            override fun deserialize(response: Response): InputStream = response.dataStream
+        })
+        logger.debug { "<-- ${response.statusCode} (${response.url})" }
+        return when (response.statusCode) {
+            HttpStatus.SC_NOT_MODIFIED -> this
+            HttpStatus.SC_OK -> {
+                val newETag = response.headers["Etag"]?.get(0) ?: ""
+                val feed = SyndFeedInput().build(XmlReader(result.get()))
+                val latestDate = feed.entries.map { it.updatedDate }.max() ?: Date(0L)
+                return ScryfallChangelog(newETag, DateTime(latestDate))
+            }
+            else -> {
+                logger.error { "$response" }
+                return ScryfallChangelog()
             }
         }
     }
