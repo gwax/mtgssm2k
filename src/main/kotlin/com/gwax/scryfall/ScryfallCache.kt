@@ -10,10 +10,12 @@ class ScryfallCache(cacheDir: File) {
         private const val DB_START_SIZE = 100 * 1024 * 1024L
         private const val DB_INCREMENT_SIZE = 10 * 1024 * 1024L
     }
+
     private enum class DBCollection {
         METADATA;
 
-        fun createOrOpen(db: DB) = db.hashMap(name)
+        fun createOrOpen(db: DB) =
+            db.hashMap(name)
                 .keySerializer(Serializer.STRING)
                 .valueSerializer(Serializer.JAVA)
                 .createOrOpen()
@@ -22,10 +24,10 @@ class ScryfallCache(cacheDir: File) {
     private val dbFile = cacheDir.resolve("scrycache.db")
 
     private fun db() =
-            DBMaker.fileDB(dbFile)
-                    .allocateStartSize(DB_START_SIZE)
-                    .allocateIncrement(DB_INCREMENT_SIZE)
-                    .make()
+        DBMaker.fileDB(dbFile)
+            .allocateStartSize(DB_START_SIZE)
+            .allocateIncrement(DB_INCREMENT_SIZE)
+            .make()
 
     fun clear() = db().use { db ->
         enumValues<DBCollection>().forEach { coll ->
@@ -33,15 +35,14 @@ class ScryfallCache(cacheDir: File) {
         }
     }
 
-    var changelog: ScryfallChangelog
+    var changelog: ScryfallChangelog?
         get() = db().use { db ->
             val metaMap = DBCollection.METADATA.createOrOpen(db)
-            val cl = metaMap["changelog"] as? ScryfallChangelog
-            return cl ?: ScryfallChangelog()
+            return metaMap["changelog"] as? ScryfallChangelog
         }
         set(value) = db().use { db ->
             DBCollection.METADATA.createOrOpen(db)
-                    .put("changelog", value)
+                .put("changelog", value)
         }
 }
 
@@ -51,12 +52,12 @@ fun main(args: Array<String>) {
 
     val cache1 = ScryfallCache(cacheDir)
     println(cache1.changelog)
-    cache1.changelog = cache1.changelog.fetchLatest()
+    cache1.changelog = ScryfallChangelog.fetch(cache1.changelog)
     println(cache1.changelog)
 
     val cache2 = ScryfallCache(cacheDir)
     println(cache2.changelog)
-    println(cache2.changelog == cache2.changelog.fetchLatest())
+    println(cache2.changelog == ScryfallChangelog.fetch(cache2.changelog))
     cache2.clear()
     println(cache2.changelog)
 }
