@@ -35,7 +35,7 @@ data class ScryfallChangelog(val eTag: String, val latestEntry: DateTime) : Seri
                         }
                         .filterNotNull()
                         .max()
-                        ?: throw Exception("Scryfall did not have latest entry date")
+                        ?: throw Exception("Scryfall did not provide latest entry date")
                     return ScryfallChangelog(newETag, DateTime(latestDate))
                 }
                 else -> {

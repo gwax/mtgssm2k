@@ -27,20 +27,20 @@ class ScryfallChangelogTest {
             }
         }
 
-    private fun feedStream(entries: List<SyndEntry>): InputStream {
+    private fun feedString(entries: List<SyndEntry>): String {
         val feed: SyndFeed = SyndFeedImpl().apply {
             this.feedType = "atom_1.0"
             this.entries = entries
         }
         val writer = StringWriter()
         SyndFeedOutput().output(feed, writer)
-        return writer.toString().byteInputStream()
+        return writer.toString()
     }
 
 
     @Test
     fun testFetchOK() {
-        val inputStream = feedStream(listOf(
+        val inputString = feedString(listOf(
             SyndEntryImpl().apply {
                 this.title = "Entry 1"
                 this.publishedDate = DateTime(2016, 1, 1, 0, 0).toDate()
@@ -56,7 +56,7 @@ class ScryfallChangelogTest {
                 url = request.url,
                 statusCode = HttpStatus.SC_OK,
                 headers = mapOf("Etag" to listOf("ghi")),
-                dataStream = inputStream)
+                dataStream = inputString.byteInputStream())
         }
         assertEquals(
             ScryfallChangelog("ghi", DateTime(2017, 1, 1, 0, 0)),
@@ -65,13 +65,13 @@ class ScryfallChangelogTest {
 
     @Test
     fun testFetchOKNoDates() {
-        val inputStream = feedStream(listOf())
+        val inputString = feedString(listOf())
         val testFuel = testManager { request ->
             Response(
                 url = request.url,
                 statusCode = HttpStatus.SC_OK,
                 headers = mapOf("Etag" to listOf("jkl")),
-                dataStream = inputStream)
+                dataStream = inputString.byteInputStream())
         }
         assertFails { ScryfallChangelog.fetch(fuel = testFuel) }
     }
