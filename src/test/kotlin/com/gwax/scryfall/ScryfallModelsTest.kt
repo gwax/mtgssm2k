@@ -67,7 +67,7 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
             arrayOf(Color::class, "\"R\"", Color.RED),
             arrayOf(Color::class, "\"G\"", Color.GREEN),
             arrayOf(
-                RelatedCard::class,
+                ScryfallModel::class,
                 """
                     |{
                     |  "object": "related_card",
@@ -83,7 +83,7 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
                 )
             ),
             arrayOf(
-                CardFace::class,
+                ScryfallModel::class,
                 """
                     |{
                     |    "object": "card_face",
@@ -128,7 +128,7 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
                 )
             ),
             arrayOf(
-                Card::class,
+                ScryfallModel::class,
                 """
                     |{
                     |    "object": "card",
@@ -322,7 +322,7 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
                 )
             ),
             arrayOf(
-                Set::class,
+                ScryfallModel::class,
                 """
                     |{
                     |    "object": "set",

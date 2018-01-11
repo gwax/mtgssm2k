@@ -6,7 +6,9 @@ import com.google.gson.GsonBuilder
 import com.github.salomonbrys.kotson.*
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.JsonPrimitive
+import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
+import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
 import org.joda.time.LocalDate
 import org.joda.time.format.ISODateTimeFormat
 import java.net.URI
@@ -14,6 +16,14 @@ import java.util.*
 
 val gsonBuilder: GsonBuilder = GsonBuilder()
     .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+    .registerTypeAdapterFactory(
+        RuntimeTypeAdapterFactory
+            .of(ScryfallModel::class.java, "object")
+            .registerSubtype(RelatedCard::class.java, "related_card")
+            .registerSubtype(CardFace::class.java, "card_face")
+            .registerSubtype(Card::class.java, "card")
+            .registerSubtype(Set::class.java, "set")
+    )
     .registerTypeAdapter<UUID> {
         serialize { JsonPrimitive(it.src.toString()) }
         deserialize { UUID.fromString(it.json.asString) }
@@ -42,11 +52,14 @@ enum class Color {
     GREEN
 }
 
+abstract class ScryfallModel
+
 data class RelatedCard(
     val id: UUID,
     val name: String,
     val uri: URI
-) {
+) : ScryfallModel() {
+    @Expose(deserialize = false)
     @SerializedName("object")
     val objectType = "related_card"
 }
@@ -64,7 +77,8 @@ data class CardFace(
     val flavorText: String? = null,
     val illustrationId: UUID? = null, // TODO: Undocumented
     val imageUris: Map<String, URI>? = null
-) {
+) : ScryfallModel() {
+    @Expose(deserialize = false)
     @SerializedName("object")
     val objectType = "card_face"
 }
@@ -128,7 +142,8 @@ data class Card(
     val eur: String? = null,
     val relatedUris: Map<String, URI>? = null,
     val purchaseUris: Map<String, URI>? = null
-) {
+) : ScryfallModel() {
+    @Expose(deserialize = false)
     @SerializedName("object")
     val objectType = "card"
 }
@@ -150,7 +165,8 @@ data class Set(
     // Undocumented Fields
     val uri: URI,
     val scryfallUri: URI
-) {
+) : ScryfallModel() {
+    @Expose(deserialize = false)
     @SerializedName("object")
     val objectType = "set"
 }
