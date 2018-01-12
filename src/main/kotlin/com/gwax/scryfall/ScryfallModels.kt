@@ -1,10 +1,9 @@
 package com.gwax.scryfall
 
-import com.google.gson.GsonBuilder
-import com.github.salomonbrys.kotson.*
+import com.github.salomonbrys.kotson.registerTypeAdapter
 import com.google.gson.FieldNamingPolicy
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonPrimitive
-import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
 import org.joda.time.LocalDate
@@ -21,6 +20,32 @@ val gsonBuilder: GsonBuilder = GsonBuilder()
             .registerSubtype(ScryfallCardFace::class.java, "card_face")
             .registerSubtype(ScryfallCard::class.java, "card")
             .registerSubtype(ScryfallSet::class.java, "set")
+            .registerSubtype(ScryfallList::class.java, "list")
+    )
+    .registerTypeAdapterFactory(
+        RuntimeTypeAdapterFactory
+            .of(ScryfallRelatedCard::class.java, "object")
+            .registerSubtype(ScryfallRelatedCard::class.java, "related_card")
+    )
+    .registerTypeAdapterFactory(
+        RuntimeTypeAdapterFactory
+            .of(ScryfallCardFace::class.java, "object")
+            .registerSubtype(ScryfallCardFace::class.java, "card_face")
+    )
+    .registerTypeAdapterFactory(
+        RuntimeTypeAdapterFactory
+            .of(ScryfallCard::class.java, "object")
+            .registerSubtype(ScryfallCard::class.java, "card")
+    )
+    .registerTypeAdapterFactory(
+        RuntimeTypeAdapterFactory
+            .of(ScryfallSet::class.java, "object")
+            .registerSubtype(ScryfallSet::class.java, "set")
+    )
+    .registerTypeAdapterFactory(
+        RuntimeTypeAdapterFactory
+            .of(ScryfallList::class.java, "object")
+            .registerSubtype(ScryfallList::class.java, "list")
     )
     .registerTypeAdapter<UUID> {
         serialize { JsonPrimitive(it.src.toString()) }
@@ -56,11 +81,7 @@ data class ScryfallRelatedCard(
     val id: UUID,
     val name: String,
     val uri: URI
-) : ScryfallModel() {
-    @Expose(deserialize = false)
-    @SerializedName("object")
-    val objectType = "related_card"
-}
+) : ScryfallModel()
 
 data class ScryfallCardFace(
     val name: String,
@@ -75,11 +96,7 @@ data class ScryfallCardFace(
     val flavorText: String? = null,
     val illustrationId: UUID? = null, // TODO: Undocumented
     val imageUris: Map<String, URI>? = null
-) : ScryfallModel() {
-    @Expose(deserialize = false)
-    @SerializedName("object")
-    val objectType = "card_face"
-}
+) : ScryfallModel()
 
 data class ScryfallCard(
     // Core Card Fields
@@ -140,11 +157,7 @@ data class ScryfallCard(
     val eur: String? = null,
     val relatedUris: Map<String, URI>? = null,
     val purchaseUris: Map<String, URI>? = null
-) : ScryfallModel() {
-    @Expose(deserialize = false)
-    @SerializedName("object")
-    val objectType = "card"
-}
+) : ScryfallModel()
 
 data class ScryfallSet(
     val code: String,
@@ -163,8 +176,12 @@ data class ScryfallSet(
     // Undocumented Fields
     val uri: URI,
     val scryfallUri: URI
-) : ScryfallModel() {
-    @Expose(deserialize = false)
-    @SerializedName("object")
-    val objectType = "set"
-}
+) : ScryfallModel()
+
+data class ScryfallList(
+    val totalCards: Int? = null,
+    val hasMore: Boolean,
+    val nextPage: URI? = null,
+    val warnings: List<String>? = null,
+    val data: List<ScryfallModel>
+) : ScryfallModel()

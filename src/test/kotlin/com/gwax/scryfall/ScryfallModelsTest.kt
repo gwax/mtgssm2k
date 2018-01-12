@@ -357,7 +357,48 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
                     blockCode = "xln",
                     block = "Ixalan",
                     iconSvgUri = URI("https://assets.scryfall.com/assets/sets/rix.svg")
-
+                )
+            ),
+            arrayOf(
+                ScryfallModel::class,
+                """
+                    |{
+                    |    "object": "list",
+                    |    "has_more": false,
+                    |    "data": [{
+                    |        "object": "related_card",
+                    |        "id": "27907985-b5f6-4098-ab43-15a0c2bf94d5",
+                    |        "name": "Bruna, the Fading Light",
+                    |        "uri": "https://api.scryfall.com/cards/emn/15a"
+                    |    }, {
+                    |        "object": "related_card",
+                    |        "id": "5a7a212e-e0b6-4f12-a95c-173cae023f93",
+                    |        "name": "Brisela, Voice of Nightmares",
+                    |        "uri": "https://api.scryfall.com/cards/emn/15b"
+                    |    }, {
+                    |        "object": "related_card",
+                    |        "id": "c75c035a-7da9-4b36-982d-fca8220b1797",
+                    |        "name": "Gisela, the Broken Blade",
+                    |        "uri": "https://api.scryfall.com/cards/emn/28a"
+                    |    }]
+                    |}
+                """.trimMargin(),
+                ScryfallList(
+                    hasMore = false,
+                    data = listOf(
+                        ScryfallRelatedCard(
+                            id = UUID.fromString("27907985-b5f6-4098-ab43-15a0c2bf94d5"),
+                            name = "Bruna, the Fading Light",
+                            uri = URI("https://api.scryfall.com/cards/emn/15a")),
+                        ScryfallRelatedCard(
+                            id = UUID.fromString("5a7a212e-e0b6-4f12-a95c-173cae023f93"),
+                            name = "Brisela, Voice of Nightmares",
+                            uri = URI("https://api.scryfall.com/cards/emn/15b")),
+                        ScryfallRelatedCard(
+                            id = UUID.fromString("c75c035a-7da9-4b36-982d-fca8220b1797"),
+                            name = "Gisela, the Broken Blade",
+                            uri = URI("https://api.scryfall.com/cards/emn/28a"))
+                    )
                 )
             )
         )
