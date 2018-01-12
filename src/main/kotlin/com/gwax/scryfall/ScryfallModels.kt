@@ -1,7 +1,5 @@
 package com.gwax.scryfall
 
-import com.beust.klaxon.*
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.github.salomonbrys.kotson.*
 import com.google.gson.FieldNamingPolicy
@@ -19,10 +17,10 @@ val gsonBuilder: GsonBuilder = GsonBuilder()
     .registerTypeAdapterFactory(
         RuntimeTypeAdapterFactory
             .of(ScryfallModel::class.java, "object")
-            .registerSubtype(RelatedCard::class.java, "related_card")
-            .registerSubtype(CardFace::class.java, "card_face")
-            .registerSubtype(Card::class.java, "card")
-            .registerSubtype(Set::class.java, "set")
+            .registerSubtype(ScryfallRelatedCard::class.java, "related_card")
+            .registerSubtype(ScryfallCardFace::class.java, "card_face")
+            .registerSubtype(ScryfallCard::class.java, "card")
+            .registerSubtype(ScryfallSet::class.java, "set")
     )
     .registerTypeAdapter<UUID> {
         serialize { JsonPrimitive(it.src.toString()) }
@@ -36,10 +34,10 @@ val gsonBuilder: GsonBuilder = GsonBuilder()
         serialize { JsonPrimitive(ISODateTimeFormat.date().print(it.src)) }
         deserialize { ISODateTimeFormat.date().parseLocalDate(it.json.asString) }
     }
-val gson: Gson = gsonBuilder.create()
+val gson = gsonBuilder.create()
 
-typealias Colors = List<Color>
-enum class Color {
+typealias ScryfallColors = List<ScryfallColor>
+enum class ScryfallColor {
     @SerializedName("W")
     WHITE,
     @SerializedName("U")
@@ -54,7 +52,7 @@ enum class Color {
 
 abstract class ScryfallModel
 
-data class RelatedCard(
+data class ScryfallRelatedCard(
     val id: UUID,
     val name: String,
     val uri: URI
@@ -64,13 +62,13 @@ data class RelatedCard(
     val objectType = "related_card"
 }
 
-data class CardFace(
+data class ScryfallCardFace(
     val name: String,
     val typeLine: String,
     val oracleText: String? = null,
     val manaCost: String,
-    val colors: Colors,
-    val colorIndicator: Colors? = null,
+    val colors: ScryfallColors,
+    val colorIndicator: ScryfallColors? = null,
     val power: String? = null,
     val toughness: String? = null,
     val loyalty: String? = null,
@@ -83,7 +81,7 @@ data class CardFace(
     val objectType = "card_face"
 }
 
-data class Card(
+data class ScryfallCard(
     // Core Card Fields
     val id: UUID,
     val multiverseIds: List<Int>? = null,
@@ -105,11 +103,11 @@ data class Card(
     val loyalty: String? = null,  // TODO: Custom type?
     val lifeModifier: String? = null,  // TODO: Int?
     val handModifier: String? = null,  // TODO: Int?
-    val colors: Colors,
-    val colorIndicator: Colors? = null,
-    val colorIdentity: Colors,
-    val allParts: List<RelatedCard>? = null,
-    val cardFaces: List<CardFace>? = null,
+    val colors: ScryfallColors,
+    val colorIndicator: ScryfallColors? = null,
+    val colorIdentity: ScryfallColors,
+    val allParts: List<ScryfallRelatedCard>? = null,
+    val cardFaces: List<ScryfallCardFace>? = null,
     val legalities: Map<String, String>,  // TODO: Map to Enum
     val reserved: Boolean,
     val edhrecRank: Int? = null,
@@ -148,7 +146,7 @@ data class Card(
     val objectType = "card"
 }
 
-data class Set(
+data class ScryfallSet(
     val code: String,
     val mtgoCode: String,
     val name: String,

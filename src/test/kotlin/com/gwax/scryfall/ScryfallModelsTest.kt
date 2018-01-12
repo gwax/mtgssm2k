@@ -61,11 +61,11 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
                 "\"http://foo.bar.baz\"",
                 URI("http://foo.bar.baz")),
             arrayOf(LocalDate::class, "2018-01-02", LocalDate(2018, 1, 2)),
-            arrayOf(Color::class, "\"W\"", Color.WHITE),
-            arrayOf(Color::class, "\"U\"", Color.BLUE),
-            arrayOf(Color::class, "\"B\"", Color.BLACK),
-            arrayOf(Color::class, "\"R\"", Color.RED),
-            arrayOf(Color::class, "\"G\"", Color.GREEN),
+            arrayOf(ScryfallColor::class, "\"W\"", ScryfallColor.WHITE),
+            arrayOf(ScryfallColor::class, "\"U\"", ScryfallColor.BLUE),
+            arrayOf(ScryfallColor::class, "\"B\"", ScryfallColor.BLACK),
+            arrayOf(ScryfallColor::class, "\"R\"", ScryfallColor.RED),
+            arrayOf(ScryfallColor::class, "\"G\"", ScryfallColor.GREEN),
             arrayOf(
                 ScryfallModel::class,
                 """
@@ -76,7 +76,7 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
                     |  "uri": "https://api.scryfall.com/cards/emn/15a"
                     |}
                 """.trimMargin(),
-                RelatedCard(
+                ScryfallRelatedCard(
                     id = UUID.fromString("27907985-b5f6-4098-ab43-15a0c2bf94d5"),
                     name = "Bruna, the Fading Light",
                     uri = URI("https://api.scryfall.com/cards/emn/15a")
@@ -105,12 +105,12 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
                     |    }
                     |}
                 """.trimMargin(),
-                CardFace(
+                ScryfallCardFace(
                     name = "Delver of Secrets",
                     typeLine = "Creature — Human Wizard",
                     oracleText = "At the beginning of your upkeep, look at the top card of your library. You may reveal that card. If an instant or sorcery card is revealed this way, transform Delver of Secrets.",
                     manaCost = "{U}",
-                    colors = listOf(Color.BLUE),
+                    colors = listOf(ScryfallColor.BLUE),
                     colorIndicator = null,
                     power = "1",
                     toughness = "1",
@@ -227,7 +227,7 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
                     |    }
                     |}
                 """.trimMargin(),
-                Card(
+                ScryfallCard(
                     id = UUID.fromString("27907985-b5f6-4098-ab43-15a0c2bf94d5"),
                     multiverseIds = listOf(414304),
                     mtgoId = 61098,
@@ -250,18 +250,18 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
                     manaCost = "{5}{W}{W}",
                     power = "5",
                     toughness = "7",
-                    colors = listOf(Color.WHITE),
-                    colorIdentity = listOf(Color.WHITE),
+                    colors = listOf(ScryfallColor.WHITE),
+                    colorIdentity = listOf(ScryfallColor.WHITE),
                     allParts = listOf(
-                        RelatedCard(
+                        ScryfallRelatedCard(
                             id = UUID.fromString("27907985-b5f6-4098-ab43-15a0c2bf94d5"),
                             name = "Bruna, the Fading Light",
                             uri = URI("https://api.scryfall.com/cards/emn/15a")),
-                        RelatedCard(
+                        ScryfallRelatedCard(
                             id = UUID.fromString("5a7a212e-e0b6-4f12-a95c-173cae023f93"),
                             name = "Brisela, Voice of Nightmares",
                             uri = URI("https://api.scryfall.com/cards/emn/15b")),
-                        RelatedCard(
+                        ScryfallRelatedCard(
                             id = UUID.fromString("c75c035a-7da9-4b36-982d-fca8220b1797"),
                             name = "Gisela, the Broken Blade",
                             uri = URI("https://api.scryfall.com/cards/emn/28a"))
@@ -342,7 +342,7 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
                     |    "icon_svg_uri": "https://assets.scryfall.com/assets/sets/rix.svg"
                     |}
                 """.trimMargin(),
-                Set(
+                ScryfallSet(
                     code = "rix",
                     mtgoCode = "rix",
                     name = "Rivals of Ixalan",
