@@ -12,7 +12,6 @@ import com.rometools.rome.io.SyndFeedOutput
 import org.apache.http.HttpStatus
 import org.joda.time.DateTime
 import org.junit.Test
-import java.io.InputStream
 import java.io.StringWriter
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
