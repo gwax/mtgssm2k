@@ -1,73 +1,65 @@
-package com.gwax.scryfall
+package com.gwax.scryfall.models
 
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
+import com.gwax.scryfall.util.gsonBuilder
+import com.gwax.scryfall.util.parseJson
+import com.gwax.scryfall.util.sortedKeys
+import com.gwax.scryfall.util.toString
 import org.joda.time.LocalDate
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.net.URI
 import java.util.*
-import kotlin.reflect.KClass
 import kotlin.test.assertEquals
 
-private val gson = gsonBuilder.setPrettyPrinting().create()
-private val jsonParser = JsonParser()
-private fun String.toPrettyJson() = gson.toJson(jsonParser.parse(this).sortedKeys())
-
-private fun JsonElement.sortedKeys(): JsonElement =
-    if (this !is JsonObject)
-        this
-    else
-        this.entrySet()
-            .sortedBy { it.key }
-            .fold(
-                JsonObject(),
-                { obj, entry ->
-                    obj.add(entry.key, entry.value.sortedKeys())
-                    obj
-                })
-
-class JsonElementSortingTest {
-    @Test
-    fun sortSomeKeys() {
-        val unsorted = "{\"b\": 1, \"a\": 2}"
-        val sorted = "{\"a\": 2, \"b\": 1}"
-        assertEquals(
-            sorted.toPrettyJson(),
-            unsorted.toPrettyJson())
-    }
+abstract class ModelTestBase() {
+    protected val gson = gsonBuilder.setPrettyPrinting().create()
+    protected fun String.reJson() =
+        gson.toJson(this.parseJson().sortedKeys())
 }
 
 @RunWith(Parameterized::class)
-class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlinValue: Any) {
+class ScryfallColorTest(private val scryfallString: String, private val enumValue: ScryfallColor) : ModelTestBase() {
     @Test
-    fun gsonTypeConversionTest() {
-        assertEquals(kotlinValue, gson.fromJson(jsonString, type.java))
-        assertEquals(jsonString.toPrettyJson(), gson.toJson(kotlinValue).toPrettyJson())
+    fun scryfallColorTest() {
+        assertEquals(
+            enumValue,
+            gson.fromJson(scryfallString, ScryfallColor::class.java))
+        assertEquals(
+            scryfallString.parseJson().sortedKeys().toString(gson),
+            gson.toJson(enumValue, ScryfallColor::class.java).reJson())
     }
 
     companion object {
         @JvmStatic
-        @Parameterized.Parameters(name = "{0}")
-        fun data(): Collection<Array<out Any?>> = listOf(
+        @Parameterized.Parameters
+        fun data(): Collection<Array<out Any>> = listOf(
+            arrayOf("W", ScryfallColor.WHITE),
+            arrayOf("U", ScryfallColor.BLUE),
+            arrayOf("B", ScryfallColor.BLACK),
+            arrayOf("R", ScryfallColor.RED),
+            arrayOf("G", ScryfallColor.GREEN)
+        )
+    }
+}
+
+@RunWith(Parameterized::class)
+class ScryfallModelsTest(private val stringValue: String, private val kotlinValue: ScryfallModel) : ModelTestBase() {
+    @Test
+    fun scryfallModelRoundTripTest() {
+        assertEquals(
+            kotlinValue,
+            gson.fromJson(stringValue, ScryfallModel::class.java))
+        assertEquals(
+            stringValue.parseJson().sortedKeys().toString(gson),
+            gson.toJson(kotlinValue).reJson())
+    }
+
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters
+        fun data(): Collection<Array<out Any>> = listOf(
             arrayOf(
-                UUID::class,
-                "\"27907985-b5f6-4098-ab43-15a0c2bf94d5\"",
-                UUID.fromString("27907985-b5f6-4098-ab43-15a0c2bf94d5")),
-            arrayOf(
-                URI::class,
-                "\"http://foo.bar.baz\"",
-                URI("http://foo.bar.baz")),
-            arrayOf(LocalDate::class, "2018-01-02", LocalDate(2018, 1, 2)),
-            arrayOf(ScryfallColor::class, "\"W\"", ScryfallColor.WHITE),
-            arrayOf(ScryfallColor::class, "\"U\"", ScryfallColor.BLUE),
-            arrayOf(ScryfallColor::class, "\"B\"", ScryfallColor.BLACK),
-            arrayOf(ScryfallColor::class, "\"R\"", ScryfallColor.RED),
-            arrayOf(ScryfallColor::class, "\"G\"", ScryfallColor.GREEN),
-            arrayOf(
-                ScryfallModel::class,
                 """
                     |{
                     |  "object": "related_card",
@@ -83,7 +75,6 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
                 )
             ),
             arrayOf(
-                ScryfallModel::class,
                 """
                     |{
                     |    "object": "card_face",
@@ -128,7 +119,6 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
                 )
             ),
             arrayOf(
-                ScryfallModel::class,
                 """
                     |{
                     |    "object": "card",
@@ -322,7 +312,6 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
                 )
             ),
             arrayOf(
-                ScryfallModel::class,
                 """
                     |{
                     |    "object": "set",
@@ -360,7 +349,6 @@ class ScryfallModelsTest(val type: KClass<*>, val jsonString: String, val kotlin
                 )
             ),
             arrayOf(
-                ScryfallModel::class,
                 """
                     |{
                     |    "object": "list",
