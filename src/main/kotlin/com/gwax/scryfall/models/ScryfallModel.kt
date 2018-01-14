@@ -1,8 +1,9 @@
 package com.gwax.scryfall.models
 
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
+import java.io.Serializable
 
-abstract class ScryfallModel {
+abstract class ScryfallModel : Serializable {
     companion object {
         val TYPE_ADAPTER_FACTORY: RuntimeTypeAdapterFactory<ScryfallModel> =
             RuntimeTypeAdapterFactory

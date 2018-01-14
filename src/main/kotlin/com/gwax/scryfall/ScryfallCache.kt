@@ -1,5 +1,7 @@
 package com.gwax.scryfall
 
+import com.gwax.scryfall.models.ScryfallCard
+import com.gwax.scryfall.models.ScryfallSet
 import org.mapdb.DB
 import org.mapdb.DBMaker
 import org.mapdb.HTreeMap
@@ -26,7 +28,8 @@ class ScryfallCache(cacheDir: File) {
 
     private enum class DBCollection {
         METADATA,
-        URLS;
+        URLS,
+        COLLECTIONS;
 
         fun createOrOpen(db: DB) =
             db.hashMap(name)
@@ -60,6 +63,26 @@ class ScryfallCache(cacheDir: File) {
         set(value) = db.transact { db ->
             DBCollection.METADATA.createOrOpen(db)
                 .put("changelog", value)
+        }
+
+    var allCards: List<ScryfallCard>?
+        get() {
+            val collectionMap = DBCollection.COLLECTIONS.createOrOpen(db)
+            return collectionMap["all_cards"] as? List<ScryfallCard>
+        }
+        set(value) = db.transact { db ->
+            DBCollection.COLLECTIONS.createOrOpen(db)
+                .put("all_cards", value)
+        }
+
+    var allSets: List<ScryfallSet>?
+        get() {
+            val collectionMap = DBCollection.COLLECTIONS.createOrOpen(db)
+            return collectionMap["all_sets"] as? List<ScryfallSet>
+        }
+        set(value) = db.transact { db ->
+            DBCollection.COLLECTIONS.createOrOpen(db)
+                .put("all_sets", value)
         }
 
     val urls = DbUrlProxy(db)
@@ -109,6 +132,7 @@ fun main(args: Array<String>) {
     println(cache1.changelog)
     cache1.changelog = ScryfallChangelog.fetch(cache1.changelog)
     println(cache1.changelog)
+    cache1.close()
 
     val cache2 = ScryfallCache(cacheDir)
     println(cache2.changelog)

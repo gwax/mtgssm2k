@@ -1,6 +1,7 @@
 package com.gwax.scryfall.models
 
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
+import java.io.Serializable
 import java.net.URI
 import java.util.*
 
