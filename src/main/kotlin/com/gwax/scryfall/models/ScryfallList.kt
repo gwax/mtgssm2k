@@ -1,12 +1,12 @@
 package com.gwax.scryfall.models
 
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
-import java.net.URI
+import java.net.URL
 
 data class ScryfallList(
     val totalCards: Int? = null,
     val hasMore: Boolean,
-    val nextPage: URI? = null,
+    val nextPage: URL? = null,
     val warnings: List<String>? = null,
     val data: List<ScryfallModel>
 ) : ScryfallModel() {

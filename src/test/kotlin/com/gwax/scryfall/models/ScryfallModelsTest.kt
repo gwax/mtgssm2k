@@ -9,6 +9,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import java.net.URI
+import java.net.URL
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -352,7 +353,8 @@ class ScryfallModelsTest(private val stringValue: String, private val kotlinValu
                 """
                     |{
                     |    "object": "list",
-                    |    "has_more": false,
+                    |    "has_more": true,
+                    |    "next_page": "https://foo.bar/baz",
                     |    "data": [{
                     |        "object": "related_card",
                     |        "id": "27907985-b5f6-4098-ab43-15a0c2bf94d5",
@@ -372,7 +374,8 @@ class ScryfallModelsTest(private val stringValue: String, private val kotlinValu
                     |}
                 """.trimMargin(),
                 ScryfallList(
-                    hasMore = false,
+                    hasMore = true,
+                    nextPage = URL("https://foo.bar/baz"),
                     data = listOf(
                         ScryfallRelatedCard(
                             id = UUID.fromString("27907985-b5f6-4098-ab43-15a0c2bf94d5"),

@@ -22,6 +22,7 @@ data class ScryfallChangelog(val eTag: String, val latestEntry: DateTime) : Seri
             val request = fuel
                 .request(Method.GET, CHANGELOG_FEED_URL)
                 .apply { if (previous != null) this.headers["If-None-Match"] = previous.eTag }
+            logger.debug { "Requesting $CHANGELOG_FEED_URL" }
             val response = fuel.client.executeRequest(request)
             logger.debug { "<-- ${response.statusCode} (${response.url})" }
             return when (response.statusCode) {
