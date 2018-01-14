@@ -21,6 +21,7 @@ class ScryfallCacheTest {
         assertEquals(
             ScryfallChangelog("abc", DateTime(17L)),
             cache1.changelog)
+        cache1.close()
 
         val cache2 = ScryfallCache(cacheDir)
         assertEquals(
@@ -28,7 +29,6 @@ class ScryfallCacheTest {
             cache2.changelog)
         cache2.clear()
         assertNull(cache2.changelog)
-        assertNull(cache1.changelog)
     }
 
     @Test
@@ -41,12 +41,12 @@ class ScryfallCacheTest {
         cache1.urls[url1] = "foobar"
         assertEquals("foobar", cache1.urls[url1])
         assertNull(cache1.urls[url2])
+        cache1.close()
 
         val cache2 = ScryfallCache(cacheDir)
         assertEquals("foobar", cache2.urls[url1])
         assertNull(cache2.urls[url2])
         cache2.clear()
         assertNull(cache2.urls[url1])
-        assertNull(cache1.urls[url1])
     }
 }

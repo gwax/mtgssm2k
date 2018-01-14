@@ -7,6 +7,17 @@ import org.mapdb.Serializer
 import java.io.File
 import java.net.URL
 
+private inline fun <reified T> DB.transact(op: (DB) -> T): T =
+    try {
+        op(this)
+    } catch (e: Exception) {
+        this.rollback()
+        throw e
+    } finally {
+        this.commit()
+    }
+
+
 class ScryfallCache(cacheDir: File) {
     companion object {
         private const val DB_START_SIZE = 100 * 1024 * 1024L
@@ -25,59 +36,65 @@ class ScryfallCache(cacheDir: File) {
     }
 
     private val dbFile = cacheDir.resolve("scrycache.db")
-
-    private fun db() =
+    private val db =
         DBMaker.fileDB(dbFile)
             .allocateStartSize(DB_START_SIZE)
             .allocateIncrement(DB_INCREMENT_SIZE)
+            .closeOnJvmShutdown()
+            .transactionEnable()
             .make()
 
-    fun clear() = db().use { db ->
+    fun close() = db.close()
+
+    fun clear() = db.transact { db ->
         enumValues<DBCollection>().forEach { coll ->
             coll.createOrOpen(db).clearWithExpire()
         }
     }
 
     var changelog: ScryfallChangelog?
-        get() = db().use { db ->
+        get() {
             val metaMap = DBCollection.METADATA.createOrOpen(db)
             return metaMap["changelog"] as? ScryfallChangelog
         }
-        set(value) = db().use { db ->
+        set(value) = db.transact { db ->
             DBCollection.METADATA.createOrOpen(db)
                 .put("changelog", value)
         }
 
-    val urls = DbUrlProxy(::db)
+    val urls = DbUrlProxy(db)
 
-    class DbUrlProxy(private val db: () -> DB) : MutableMap<URL, String> {
-        private fun <T> proxy(op: HTreeMap<String, Any>.() -> T): T = db().use { db ->
+    class DbUrlProxy(private val db: DB) : MutableMap<URL, String> {
+        private fun <T> readProxy(op: HTreeMap<String, Any>.() -> T): T =
+            DBCollection.URLS.createOrOpen(db).let(op)
+
+        inline private fun <reified T> writeProxy(op: HTreeMap<String, Any>.() -> T): T = db.transact { db ->
             DBCollection.URLS.createOrOpen(db).let(op)
         }
 
-        override fun get(key: URL) = proxy { this[key.toString()] as String? }
-        override fun put(key: URL, value: String) = proxy { this.put(key.toString(), value) as String? }
-        override fun remove(key: URL) = proxy { this.remove(key.toString()) as String?}
-        override fun clear() = proxy { this.clear() }
-        override fun isEmpty() = proxy { this.isEmpty() }
+        override fun get(key: URL) = readProxy { this[key.toString()] as String? }
+        override fun put(key: URL, value: String) = writeProxy { this.put(key.toString(), value) as String? }
+        override fun remove(key: URL) = writeProxy { this.remove(key.toString()) as String?}
+        override fun clear() = writeProxy { this.clear() }
+        override fun isEmpty() = readProxy { this.isEmpty() }
         override val size: Int
-            get() = proxy { this.size }
+            get() = readProxy { this.size }
         override val entries: MutableSet<MutableMap.MutableEntry<URL, String>>
-            get() = proxy { this.entries }
+            get() = readProxy { this.entries }
                 .map { (k, v) -> URL(k) to v as String}
                 .toMap()
                 .toMutableMap()
                 .entries
                 .toMutableSet()
 
-        override fun containsKey(key: URL) = proxy { this.containsKey(key.toString()) }
-        override fun containsValue(value: String) = proxy { this.containsValue(value) }
+        override fun containsKey(key: URL) = readProxy { this.containsKey(key.toString()) }
+        override fun containsValue(value: String) = readProxy { this.containsValue(value) }
         override val keys: MutableSet<URL>
-            get() = proxy { this.keys.map { URL(it) }.toMutableSet() }
+            get() = readProxy { this.keys.map { URL(it) }.toMutableSet() }
         override val values: MutableCollection<String>
-            get() = proxy { this.values.map { it as String }.toMutableList() }
+            get() = readProxy { this.values.map { it as String }.toMutableList() }
 
-        override fun putAll(from: Map<out URL, String>) = proxy {
+        override fun putAll(from: Map<out URL, String>) = writeProxy {
             this.putAll(from.entries.map { (k, v) -> k.toString() to v})
         }
 

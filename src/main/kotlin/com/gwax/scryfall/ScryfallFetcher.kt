@@ -20,6 +20,15 @@ enum class Endpoint(val url: URL) {
 }
 
 class ScryfallFetcher(
+    private val endpoint: Endpoint,
+    private val cache: ScryfallCache,
+    private val fuel: FuelManager = defaultFuel
+) : Iterable<ScryfallModel> {
+    override fun iterator(): Iterator<ScryfallModel> =
+        ScryfallFetcherIterator(endpoint, cache, fuel)
+}
+
+class ScryfallFetcherIterator(
     endpoint: Endpoint,
     private val cache: ScryfallCache,
     private val fuel: FuelManager = defaultFuel
@@ -45,10 +54,12 @@ class ScryfallFetcher(
         } else {
             val request = fuel.request(Method.GET, nextPage.toString())
             while (lastCall + MIN_FETCH_WAIT_MILLIS > System.currentTimeMillis()) {
+                logger.trace { "Sleeping until rate limit passed" }
                 Thread.sleep(System.currentTimeMillis() - lastCall)
             }
-            logger.debug { "Requesting $target" }
+            logger.info { "Requesting $target" }
             val response = fuel.client.executeRequest(request)
+            logger.debug { "<-- ${response.statusCode} (${response.url})" }
             lastCall = System.currentTimeMillis()
             when (response.statusCode) {
                 HttpStatus.SC_OK -> {
@@ -69,7 +80,12 @@ fun main(args: Array<String>) {
     val cacheDir = createTempDir()
     cacheDir.deleteOnExit()
     val cache = ScryfallCache(cacheDir)
-    val fetcher = ScryfallFetcher(Endpoint.CARDS, cache)
-    println(fetcher.next())
-    println(fetcher.next())
+    val fetcher = ScryfallFetcherIterator(Endpoint.CARDS, cache)
+    println(fetcher.next().data.size)
+    println(fetcher.next().data.size)
+    println(fetcher.next().data.size)
+    println("try2")
+    val fetcher2 = ScryfallFetcherIterator(Endpoint.CARDS, cache)
+    println(fetcher2.next().data.size)
+    println(fetcher2.next().data.size)
 }
