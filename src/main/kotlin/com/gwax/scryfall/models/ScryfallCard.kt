@@ -66,8 +66,9 @@ data class ScryfallCard(
     val purchaseUris: Map<String, URI>? = null
 ) : ScryfallModel() {
     companion object {
-        val TYPE_ADAPTER_FACTORY = RuntimeTypeAdapterFactory
-            .of(ScryfallCard::class.java, "object")
-            .registerSubtype(ScryfallCard::class.java, "card")
+        val TYPE_ADAPTER_FACTORY: RuntimeTypeAdapterFactory<ScryfallCard> =
+            RuntimeTypeAdapterFactory
+                .of(ScryfallCard::class.java, "object")
+                .registerSubtype(ScryfallCard::class.java, "card")
     }
 }

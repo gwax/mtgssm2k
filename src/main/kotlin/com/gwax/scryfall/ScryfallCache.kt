@@ -6,6 +6,7 @@ import org.mapdb.DB
 import org.mapdb.DBMaker
 import org.mapdb.HTreeMap
 import org.mapdb.Serializer
+import org.mapdb.serializer.SerializerCompressionWrapper
 import java.io.File
 import java.net.URL
 
@@ -22,8 +23,8 @@ private inline fun <reified T> DB.transact(op: (DB) -> T): T =
 
 class ScryfallCache(cacheDir: File) {
     companion object {
-        private const val DB_START_SIZE = 100 * 1024 * 1024L
-        private const val DB_INCREMENT_SIZE = 10 * 1024 * 1024L
+        private const val DB_START_SIZE = 20 * 1024 * 1024L
+        private const val DB_INCREMENT_SIZE = 2 * 1024 * 1024L
     }
 
     private enum class DBCollection {
@@ -34,7 +35,7 @@ class ScryfallCache(cacheDir: File) {
         fun createOrOpen(db: DB) =
             db.hashMap(name)
                 .keySerializer(Serializer.STRING)
-                .valueSerializer(Serializer.JAVA)
+                .valueSerializer(SerializerCompressionWrapper(Serializer.JAVA))
                 .createOrOpen()
     }
 
@@ -43,6 +44,9 @@ class ScryfallCache(cacheDir: File) {
         DBMaker.fileDB(dbFile)
             .allocateStartSize(DB_START_SIZE)
             .allocateIncrement(DB_INCREMENT_SIZE)
+            .fileMmapEnableIfSupported()
+            .fileMmapPreclearDisable()
+            .cleanerHackEnable()
             .closeOnJvmShutdown()
             .transactionEnable()
             .make()
